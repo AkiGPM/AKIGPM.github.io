@@ -1,0 +1,23 @@
+<head>
+<script>
+function validateForm() {
+  let x = document.forms["Menu"]["donation"].value;
+  if ( x=="" ) {
+    alert("Must Have Value");
+    return false;
+  }
+}
+</script>
+</head>
+
+<h1>Uncle's Donation Site</h1>
+<label for="fname">Donation Amount:</label>
+
+<form name="Menu" action="donationpage.html" method="post" >
+ <input type="text" id="donation" name="donation">
+
+<input type="submit" value="Submit">
+
+</form>
+
+<img src="/images/jollibee.jpeg" alt="jollibee" > 
