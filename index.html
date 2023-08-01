@@ -1,15 +1,26 @@
- <head>
+<style>
+
+canvas{ border: 1px solid gray;} 
+
+
+</style>
+
 <script>
 
+var Canvas = document.getElementById('aki-engine');
+var ctx = Canvas.getContext('2d');
+
+
+function DrawSquare(x, y, side) {
+     ctx.beginPath();
+     ctx.rect(x, y, side, side); //
+     ctx.stroke();
+} 
+DrawSquare(30,30,100)
 
 </script>
-</head>
 
-<h1>Uncle's Donation Site</h1>
-<label for="fname">Donation Amount:</label>
 
- <input type="text" id="donation" name="donation">
 
-<a href="https://www.google.com/search?q=bitches&oq=bitches&aqs=chrome..69i57.1575j0j7&sourceid=chrome-mobile&ie=UTF-8"><input type="submit" value="Submit"></a>
-
-<img src="https://i.ibb.co/QF4259c/jollibee.jpg " alt="jollibee" > 
+<h1>Aki Engine Test</h1>
+<canvas id='aki-engine' width="200" height="200" ></canvas>
