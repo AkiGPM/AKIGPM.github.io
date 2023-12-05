@@ -1,26 +1,67 @@
-<style>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Batch Image Watermarking and Zipping</title>
+  <script src="libs/p5.js"></script>
+  <script src="libs/jszip.min.js"></script>
+</head>
+<body>
+  <h1>Batch Image Watermarking and Zipping</h1>
+  <input type="file" id="imageInput" accept="image/*" multiple>
+  <input type="file" id="watermarkInput" accept="image/*">
+  <button onclick="watermarkAndZip()">Watermark and Zip</button>
 
-canvas{ border: 1px solid gray;} 
+  <script>
+    async function watermarkAndZip() {
+      let originalFiles = document.getElementById('imageInput').files;
+      let watermarkFile = document.getElementById('watermarkInput').files[0];
+
+      if (originalFiles.length > 0 && watermarkFile) {
+        let watermarkImg = await createImg(URL.createObjectURL(watermarkFile), 'watermark');
+        watermarkImg.hide(); // Hide the watermark image
+
+        let zip = new JSZip();
+        let promises = [];
+
+        // Inside the loop for processing each image
+        for (let i = 0; i < originalFiles.length; i++) {
+          let originalFile = originalFiles[i];
+          let img = await loadImage(URL.createObjectURL(originalFile));
+        
+          // Add this line to create a canvas
+          let cnv = createCanvas(img.width, img.height);
+          cnv.background(255); // Set a background color if needed
+        
+          // Watermark the image
+          image(watermarkImg, 10, img.height - watermarkImg.height - 10);
+        
+          // Convert the watermarked image to blob
+          img.loadPixels();
+          let blob = await new Promise(resolve => {
+            img.canvas.toBlob(resolve, 'image/jpeg');
+          });
+        
+          // Add the watermarked image to the .zip
+          zip.file('watermarked_' + originalFile.name, blob);
+        }
 
 
-</style>
-
-<script>
-
-var Canvas = document.getElementById('aki-engine');
-var ctx = Canvas.getContext('2d');
-
-
-function DrawSquare(x, y, side) {
-     ctx.beginPath();
-     ctx.rect(x, y, side, side); //
-     ctx.stroke();
-} 
-DrawSquare(30,30,100)
-
-</script>
-
-
-
-<h1>Aki Engine Test</h1>
-<canvas id='aki-engine' width="200" height="200" ></canvas>
+        // Generate the .zip file
+        zip.generateAsync({type: 'blob'})
+          .then(function(content) {
+            let a = document.createElement("a");
+            let url = URL.createObjectURL(content);
+            a.href = url;
+            a.download = "watermarked_images.zip";
+            a.click();
+            URL.revokeObjectURL(url);
+          });
+      } else {
+        alert('Please select image files and a watermark image.');
+      }
+    }
+  </script>
+</body>
+</html>
