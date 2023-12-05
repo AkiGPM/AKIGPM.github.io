@@ -6,6 +6,8 @@
   <title>Batch Image Watermarking and Zipping</title>
   <!-- Include p5.js library -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
+  <!-- Include p5.dom library -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/addons/p5.dom.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.5/jszip.min.js"></script>
 </head>
 <body>
@@ -20,8 +22,8 @@
       let watermarkFile = document.getElementById('watermarkInput').files[0];
 
       if (originalFiles.length > 0 && watermarkFile) {
-        // Use createImg from the p5.js library
-        let watermarkImg = await createImg(URL.createObjectURL(watermarkFile), 'watermark');
+        // Use createImg from the p5.dom library
+        let watermarkImg = createImg(URL.createObjectURL(watermarkFile), 'watermark');
         watermarkImg.hide(); // Hide the watermark image
 
         let zip = new JSZip();
