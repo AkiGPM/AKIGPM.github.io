@@ -8,7 +8,6 @@
 </head>
 <body>
   <input type="file" id="imageInput" multiple>
-  <input type="file" id="watermarkInput">
   <input type="number" id="watermarkSize" placeholder="Watermark Size (percentage)">
   <button onclick="processImages()">Watermark Images</button>
 
@@ -16,10 +15,6 @@
     let images = [];
     let watermark;
     let watermarkSize = 10; // Default watermark size as a percentage
-
-    function preload() {
-      watermark = loadImage('watermark.png'); // Replace with the correct filename
-    }
 
     function setup() {
       // Setup your canvas or any other initialization if needed
@@ -32,22 +27,28 @@
     function processImages() {
       watermarkSize = parseFloat(document.getElementById('watermarkSize').value) || 10;
 
-      let imageInput = document.getElementById('imageInput');
-      let files = imageInput.files;
+      fetch('path/to/watermark.png') // Replace with the correct path to your watermark image
+        .then(response => response.blob())
+        .then(blob => {
+          watermark = loadImage(URL.createObjectURL(blob), () => {
+            let imageInput = document.getElementById('imageInput');
+            let files = imageInput.files;
 
-      images = []; // Reset images array
+            images = []; // Reset images array
 
-      for (let i = 0; i < files.length; i++) {
-        let file = files[i];
-        if (file.type.startsWith('image/')) {
-          let img = loadImage(URL.createObjectURL(file), (loadedImg) => {
-            images.push(loadedImg);
-            if (images.length === files.length) {
-              watermarkImages();
+            for (let i = 0; i < files.length; i++) {
+              let file = files[i];
+              if (file.type.startsWith('image/')) {
+                let img = loadImage(URL.createObjectURL(file), (loadedImg) => {
+                  images.push(loadedImg);
+                  if (images.length === files.length) {
+                    watermarkImages();
+                  }
+                });
+              }
             }
           });
-        }
-      }
+        });
     }
 
     function watermarkImages() {
