@@ -23,7 +23,7 @@
     <input type="file" id="watermarkUpload" accept="image/*">
   </div>
 
-  <canvas id="myCanvas" width="400" height="400"></canvas>
+  <canvas id="myCanvas"></canvas>
 
   <script>
     let baseImage;
@@ -43,7 +43,15 @@
     function drawImages() {
       background(255);
       if (baseImage) {
-        image(baseImage, 0, 0, width, height);
+        let aspectRatio = baseImage.width / baseImage.height;
+        let canvasWidth = min(width, baseImage.width);
+        let canvasHeight = min(height, baseImage.height);
+        if (width / height > aspectRatio) {
+          canvasWidth = height * aspectRatio;
+        } else {
+          canvasHeight = width / aspectRatio;
+        }
+        image(baseImage, 0, 0, canvasWidth, canvasHeight);
       }
       if (watermarkImage) {
         image(watermarkImage, 0, 0, width, height);
