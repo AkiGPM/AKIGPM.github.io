@@ -30,8 +30,10 @@
     <label for="watermarkPosition">Watermark Position:</label>
     <select id="watermarkPosition">
       <option value="center">Center</option>
-      <option value="bottom-left">Bottom Left</option>
+      <option value="upper-left">Upper Left</option>
       <option value="upper-right">Upper Right</option>
+      <option value="bottom-left">Bottom Left</option>
+      <option value="bottom-right">Bottom Right</option>
     </select>
   </div>
 
@@ -86,12 +88,18 @@
         if (watermarkPosition === 'center') {
           x = (width - watermarkSize) / 2;
           y = (height - watermarkSize) / 2;
-        } else if (watermarkPosition === 'bottom-left') {
+        } else if (watermarkPosition === 'upper-left') {
           x = 0;
-          y = height - watermarkSize;
+          y = 0;
         } else if (watermarkPosition === 'upper-right') {
           x = width - watermarkSize;
           y = 0;
+        } else if (watermarkPosition === 'bottom-left') {
+          x = 0;
+          y = height - watermarkSize;
+        } else if (watermarkPosition === 'bottom-right') {
+          x = width - watermarkSize;
+          y = height - watermarkSize;
         }
 
         image(watermarkImage, x, y, watermarkSize, watermarkSize);
