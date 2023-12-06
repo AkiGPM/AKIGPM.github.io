@@ -76,7 +76,7 @@
       }
 
       zip.generateAsync({ type: 'blob' }).then((content) => {
-        saveAs(content, 'watermarked_images.zip');
+        save(content, 'watermarked_images.zip');
       });
     }
   </script>
