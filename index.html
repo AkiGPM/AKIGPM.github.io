@@ -23,11 +23,25 @@
     <input type="file" id="watermarkUpload" accept="image/*">
   </div>
 
+  <div id="watermarkOptions">
+    <label for="watermarkSize">Watermark Size:</label>
+    <input type="number" id="watermarkSize" value="100" min="1" max="500">
+    
+    <label for="watermarkPosition">Watermark Position:</label>
+    <select id="watermarkPosition">
+      <option value="center">Center</option>
+      <option value="bottom-left">Bottom Left</option>
+      <option value="upper-right">Upper Right</option>
+    </select>
+  </div>
+
   <canvas id="myCanvas"></canvas>
 
   <script>
     let baseImage;
     let watermarkImage;
+    let watermarkSize = 100;
+    let watermarkPosition = 'center';
 
     function setup() {
       createCanvas(400, 400);
@@ -38,6 +52,10 @@
 
       // Listen for changes in the watermark input
       document.getElementById('watermarkInput').addEventListener('change', handleWatermarkUpload);
+
+      // Listen for changes in watermark options
+      document.getElementById('watermarkSize').addEventListener('input', handleWatermarkSizeChange);
+      document.getElementById('watermarkPosition').addEventListener('change', handleWatermarkPositionChange);
     }
 
     function drawImages() {
@@ -54,7 +72,20 @@
         image(baseImage, 0, 0, canvasWidth, canvasHeight);
       }
       if (watermarkImage) {
-        image(watermarkImage, 0, 0, width, height);
+        let x, y;
+
+        if (watermarkPosition === 'center') {
+          x = (width - watermarkSize) / 2;
+          y = (height - watermarkSize) / 2;
+        } else if (watermarkPosition === 'bottom-left') {
+          x = 0;
+          y = height - watermarkSize;
+        } else if (watermarkPosition === 'upper-right') {
+          x = width - watermarkSize;
+          y = 0;
+        }
+
+        image(watermarkImage, x, y, watermarkSize, watermarkSize);
       }
     }
 
@@ -78,6 +109,16 @@
         };
         reader.readAsDataURL(file);
       }
+    }
+
+    function handleWatermarkSizeChange() {
+      watermarkSize = parseInt(document.getElementById('watermarkSize').value, 10);
+      drawImages();
+    }
+
+    function handleWatermarkPositionChange() {
+      watermarkPosition = document.getElementById('watermarkPosition').value;
+      drawImages();
     }
 
     function draw() {
