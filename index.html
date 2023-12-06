@@ -16,13 +16,11 @@
   <div id="baseImageInput">
     <label for="baseImageUpload">Upload Base Image:</label>
     <input type="file" id="baseImageUpload" accept="image/*">
-    <button onclick="uploadBaseImage()">Upload</button>
   </div>
 
   <div id="watermarkInput">
     <label for="watermarkUpload">Upload Watermark:</label>
     <input type="file" id="watermarkUpload" accept="image/*">
-    <button onclick="uploadWatermark()">Upload</button>
   </div>
 
   <canvas id="myCanvas" width="400" height="400"></canvas>
@@ -36,10 +34,10 @@
       background(255);
 
       // Listen for changes in the base image input
-      document.getElementById('baseImageUpload').addEventListener('change', handleBaseImageUpload);
+      document.getElementById('baseImageInput').addEventListener('change', handleBaseImageUpload);
 
       // Listen for changes in the watermark input
-      document.getElementById('watermarkUpload').addEventListener('change', handleWatermarkUpload);
+      document.getElementById('watermarkInput').addEventListener('change', handleWatermarkUpload);
     }
 
     function drawImages() {
@@ -72,14 +70,6 @@
         };
         reader.readAsDataURL(file);
       }
-    }
-
-    function uploadBaseImage() {
-      document.getElementById('baseImageUpload').click();
-    }
-
-    function uploadWatermark() {
-      document.getElementById('watermarkUpload').click();
     }
 
     function draw() {
