@@ -28,36 +28,38 @@
       // Draw your content here
     }
 
-    function applyWatermark() {
+    function loadImageAsync(file) {
+      return new Promise((resolve) => {
+        loadImage(URL.createObjectURL(file), (img) => resolve(img));
+      });
+    }
+
+    async function applyWatermark() {
       const watermarkInput = document.getElementById('watermarkInput');
       const imageInput = document.getElementById('imageInput');
 
       if (watermarkInput.files.length > 0 && imageInput.files.length > 0) {
         const watermarkFile = watermarkInput.files[0];
-        watermarkImage = loadImage(URL.createObjectURL(watermarkFile), () => {
-          // Once the watermark is loaded, trigger image loading
-          loadImages();
-        });
+        watermarkImage = await loadImageAsync(watermarkFile);
+
+        // Once the watermark is loaded, trigger image loading
+        for (let i = 0; i < imageInput.files.length; i++) {
+          const imageFile = imageInput.files[i];
+          const img = await loadImageAsync(imageFile);
+          imagesToWatermark.push(img);
+        }
+
+        showWatermarkPreview();
+        watermarkImages();
       } else {
         alert("Please upload both a watermark image and one or more images to watermark.");
       }
     }
 
-    function loadImages() {
-      if (imageInput.files.length > 0) {
-        imagesToWatermark = [];
-
-        for (let i = 0; i < imageInput.files.length; i++) {
-          const imageFile = imageInput.files[i];
-          const img = loadImage(URL.createObjectURL(imageFile), () => {
-            imagesToWatermark.push(img);
-
-            if (imagesToWatermark.length === imageInput.files.length) {
-              watermarkImages();
-            }
-          });
-        }
-      }
+    function showWatermarkPreview() {
+      clear();
+      image(imagesToWatermark[0], 0, 0, width, height);
+      image(watermarkImage, 0, 0, width, height);
     }
 
     function watermarkImages() {
@@ -76,7 +78,7 @@
       }
 
       zip.generateAsync({ type: 'blob' }).then((content) => {
-        save(content, 'watermarked_images.zip');
+        saveAs(content, 'watermarked_images.zip');
       });
     }
   </script>
