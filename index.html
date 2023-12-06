@@ -3,85 +3,77 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Batch Image Watermarker</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.2.2/jszip.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.5.0/jszip.min.js"></script>
 </head>
 <body>
-  <input type="file" id="imageInput" multiple>
-  <input type="number" id="watermarkSize" placeholder="Watermark Size (percentage)">
-  <button onclick="processImages()">Watermark Images</button>
+  <input type="file" id="watermarkInput" accept="image/*">
+  <br>
+  <input type="file" id="imageInput" multiple accept="image/*">
+  <br>
+  <button onclick="applyWatermark()">Apply Watermark</button>
+  <br>
+  <canvas id="canvas"></canvas>
 
   <script>
-    let images = [];
-    let watermark;
-    let watermarkSize = 10; // Default watermark size as a percentage
+    let watermarkImage;
+    let imagesToWatermark = [];
+
+    function preload() {
+      watermarkImage = loadImage('path/to/default/watermark.png'); // Default watermark image
+    }
 
     function setup() {
-      // Setup your canvas or any other initialization if needed
+      createCanvas(400, 400);
     }
 
     function draw() {
-      // Draw anything if needed
+      // Draw your content here
     }
 
-    function processImages() {
-      watermarkSize = parseFloat(document.getElementById('watermarkSize').value) || 10;
+    function applyWatermark() {
+      const watermarkInput = document.getElementById('watermarkInput');
+      const imageInput = document.getElementById('imageInput');
 
-      fetch('path/to/watermark.png') // Replace with the correct path to your watermark image
-        .then(response => response.blob())
-        .then(blob => {
-          watermark = loadImage(URL.createObjectURL(blob), () => {
-            let imageInput = document.getElementById('imageInput');
-            let files = imageInput.files;
+      if (watermarkInput.files.length > 0) {
+        const watermarkFile = watermarkInput.files[0];
+        watermarkImage = loadImage(URL.createObjectURL(watermarkFile));
+      }
 
-            images = []; // Reset images array
+      if (imageInput.files.length > 0) {
+        imagesToWatermark = [];
 
-            for (let i = 0; i < files.length; i++) {
-              let file = files[i];
-              if (file.type.startsWith('image/')) {
-                let img = loadImage(URL.createObjectURL(file), (loadedImg) => {
-                  images.push(loadedImg);
-                  if (images.length === files.length) {
-                    watermarkImages();
-                  }
-                });
-              }
+        for (let i = 0; i < imageInput.files.length; i++) {
+          const imageFile = imageInput.files[i];
+          const img = loadImage(URL.createObjectURL(imageFile), () => {
+            imagesToWatermark.push(img);
+
+            if (imagesToWatermark.length === imageInput.files.length) {
+              watermarkImages();
             }
           });
-        });
+        }
+      }
     }
 
     function watermarkImages() {
-      let zip = new JSZip();
+      const zip = new JSZip();
 
-      for (let i = 0; i < images.length; i++) {
-        let img = images[i];
-        let watermarkedImage = createGraphics(img.width, img.height);
-        watermarkedImage.image(img, 0, 0);
+      for (let i = 0; i < imagesToWatermark.length; i++) {
+        const img = imagesToWatermark[i];
+        const outputCanvas = createCanvas(img.width, img.height);
+        image(img, 0, 0);
 
-        // Adjust the position of the watermark
-        let x = 10;
-        let y = img.height - watermark.height * watermarkSize / 100 - 10;
+        // Apply watermark
+        image(watermarkImage, 0, 0, img.width, img.height);
 
-        watermarkedImage.image(watermark, x, y, watermark.width * watermarkSize / 100, watermark.height * watermarkSize / 100);
-
-        // Convert the watermarkedImage to base64
-        let base64Img = watermarkedImage.canvas.toDataURL('image/jpeg').split(',')[1];
-
-        // Add the base64 image to the zip file
-        zip.file(`watermarked_image_${i}.jpg`, base64Img, { base64: true });
+        const imageData = outputCanvas.elt.toDataURL('image/png');
+        zip.file(`watermarked_image_${i + 1}.png`, imageData.substr(imageData.indexOf(',') + 1), { base64: true });
       }
 
-      // Create and trigger the download of the zip file
-      zip.generateAsync({ type: 'blob' }).then((blob) => {
-        let url = URL.createObjectURL(blob);
-        let a = document.createElement('a');
-        a.href = url;
-        a.download = 'watermarked_images.zip';
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
+      zip.generateAsync({ type: 'blob' }).then((content) => {
+        saveAs(content, 'watermarked_images.zip');
       });
     }
   </script>
