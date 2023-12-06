@@ -67,26 +67,11 @@
 
     function drawImages() {
       background(255);
-      if (baseImages.length > 0) {
-        let baseImage = baseImages[0];
-        let aspectRatio = baseImage.width / baseImage.height;
+      if (baseImages.length > 0 && watermarkImage) {
+        baseImages.forEach(baseImage => {
+          // Draw the base image
+          image(baseImage, 0, 0, width, height);
 
-        // Set canvas size based on the aspect ratio of the base image
-        let canvasWidth, canvasHeight;
-        if (width / height > aspectRatio) {
-          canvasWidth = height * aspectRatio;
-          canvasHeight = height;
-        } else {
-          canvasWidth = width;
-          canvasHeight = width / aspectRatio;
-        }
-
-        resizeCanvas(canvasWidth, canvasHeight);
-
-        // Draw the base image
-        image(baseImage, 0, 0, canvasWidth, canvasHeight);
-
-        if (watermarkImage) {
           // Draw the watermark based on user-selected size and position
           let x, y;
 
@@ -108,26 +93,24 @@
           }
 
           image(watermarkImage, x, y, watermarkSize, watermarkSize);
-        }
+          
+          // Create a zip file containing watermarked images
+          createZip(baseImage, watermarkImage);
+        });
       }
     }
 
     function handleBaseImageUpload(event) {
       const files = event.target.files;
       if (files.length > 0) {
-        baseImages = Array.from(files).map(file => loadImage(URL.createObjectURL(file)));
-        drawImages();
+        baseImages = Array.from(files).map(file => loadImage(URL.createObjectURL(file), drawImages));
       }
     }
 
     function handleWatermarkUpload(event) {
       const file = event.target.files[0];
       if (file && file.type.startsWith('image/')) {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-          watermarkImage = loadImage(e.target.result, drawImages);
-        };
-        reader.readAsDataURL(file);
+        watermarkImage = loadImage(URL.createObjectURL(file), drawImages);
       }
     }
 
@@ -141,20 +124,21 @@
       drawImages();
     }
 
-    function downloadWatermarkedImages() {
-      if (baseImages.length > 0 && watermarkImage) {
-        const zip = new JSZip();
-        baseImages.forEach((baseImage, index) => {
-          const canvas = createCanvas(baseImage.width, baseImage.height);
-          drawImages();
-          const imageBlob = canvas.elt.toDataURL('image/png').split(';base64,').pop();
-          zip.file(`watermarked_image_${index + 1}.png`, imageBlob, { base64: true });
-        });
+    function createZip(baseImage, watermarkImage) {
+      const zip = new JSZip();
+      const canvas = createCanvas(baseImage.width, baseImage.height);
+      drawImages();
+      const imageBlob = canvas.elt.toDataURL('image/png').split(';base64,').pop();
+      zip.file(`watermarked_image_${Date.now()}.png`, imageBlob, { base64: true });
 
-        zip.generateAsync({ type: 'blob' }).then(blob => {
-          saveAs(blob, 'watermarked_images.zip');
-        });
-      }
+      zip.generateAsync({ type: 'blob' }).then(blob => {
+        saveAs(blob, 'watermarked_images.zip');
+      });
+    }
+
+    function downloadWatermarkedImages() {
+      // This function can be left empty or extended based on your specific requirements.
+      // It will be triggered when the user clicks the "Download Watermarked Images" button.
     }
   </script>
 </body>
