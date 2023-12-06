@@ -37,6 +37,9 @@
     </select>
   </div>
 
+  <button id="downloadBaseImage" onclick="downloadBaseImage()">Download Base Image</button>
+  <button id="downloadWatermarkedImage" onclick="downloadWatermarkedImage()">Download Watermarked Image</button>
+
   <canvas id="myCanvas"></canvas>
 
   <script>
@@ -136,6 +139,28 @@
     function handleWatermarkPositionChange() {
       watermarkPosition = document.getElementById('watermarkPosition').value;
       drawImages();
+    }
+
+    function downloadBaseImage() {
+      if (baseImages.length > 0) {
+        const baseImage = baseImages[currentBaseImageIndex];
+        const link = document.createElement('a');
+        link.href = baseImage.canvas.toDataURL('image/png');
+        link.download = 'base_image.png';
+        link.click();
+      }
+    }
+
+    function downloadWatermarkedImage() {
+      if (baseImages.length > 0 && watermarkImage) {
+        const baseImage = baseImages[currentBaseImageIndex];
+        const canvas = createCanvas(baseImage.width, baseImage.height);
+        drawImages();
+        const link = document.createElement('a');
+        link.href = canvas.elt.toDataURL('image/png');
+        link.download = 'watermarked_image.png';
+        link.click();
+      }
     }
 
     function draw() {
