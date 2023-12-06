@@ -14,8 +14,8 @@
 </head>
 <body>
   <div id="baseImageInput">
-    <label for="baseImageUpload">Upload Base Image:</label>
-    <input type="file" id="baseImageUpload" accept="image/*">
+    <label for="baseImageUpload">Upload Base Images:</label>
+    <input type="file" id="baseImageUpload" accept="image/*" multiple>
   </div>
 
   <div id="watermarkInput">
@@ -40,7 +40,8 @@
   <canvas id="myCanvas"></canvas>
 
   <script>
-    let baseImage;
+    let baseImages = [];
+    let currentBaseImageIndex = 0;
     let watermarkImage;
     let watermarkSize = 100;
     let watermarkPosition = 'center';
@@ -51,10 +52,10 @@
       background(255);
 
       // Listen for changes in the base image input
-      document.getElementById('baseImageInput').addEventListener('change', handleBaseImageUpload);
+      document.getElementById('baseImageUpload').addEventListener('change', handleBaseImageUpload);
 
       // Listen for changes in the watermark input
-      document.getElementById('watermarkInput').addEventListener('change', handleWatermarkUpload);
+      document.getElementById('watermarkUpload').addEventListener('change', handleWatermarkUpload);
 
       // Listen for changes in watermark options
       document.getElementById('watermarkSize').addEventListener('input', handleWatermarkSizeChange);
@@ -63,7 +64,8 @@
 
     function drawImages() {
       background(255);
-      if (baseImage) {
+      if (baseImages.length > 0) {
+        let baseImage = baseImages[currentBaseImageIndex];
         let aspectRatio = baseImage.width / baseImage.height;
 
         // Set canvas size based on the aspect ratio of the base image
@@ -80,40 +82,38 @@
 
         // Draw the base image
         image(baseImage, 0, 0, canvasWidth, canvasHeight);
-      }
-      if (watermarkImage) {
-        // Draw the watermark based on user-selected size and position
-        let x, y;
 
-        if (watermarkPosition === 'center') {
-          x = (width - watermarkSize) / 2;
-          y = (height - watermarkSize) / 2;
-        } else if (watermarkPosition === 'upper-left') {
-          x = 0;
-          y = 0;
-        } else if (watermarkPosition === 'upper-right') {
-          x = width - watermarkSize;
-          y = 0;
-        } else if (watermarkPosition === 'bottom-left') {
-          x = 0;
-          y = height - watermarkSize;
-        } else if (watermarkPosition === 'bottom-right') {
-          x = width - watermarkSize;
-          y = height - watermarkSize;
+        if (watermarkImage) {
+          // Draw the watermark based on user-selected size and position
+          let x, y;
+
+          if (watermarkPosition === 'center') {
+            x = (width - watermarkSize) / 2;
+            y = (height - watermarkSize) / 2;
+          } else if (watermarkPosition === 'upper-left') {
+            x = 0;
+            y = 0;
+          } else if (watermarkPosition === 'upper-right') {
+            x = width - watermarkSize;
+            y = 0;
+          } else if (watermarkPosition === 'bottom-left') {
+            x = 0;
+            y = height - watermarkSize;
+          } else if (watermarkPosition === 'bottom-right') {
+            x = width - watermarkSize;
+            y = height - watermarkSize;
+          }
+
+          image(watermarkImage, x, y, watermarkSize, watermarkSize);
         }
-
-        image(watermarkImage, x, y, watermarkSize, watermarkSize);
       }
     }
 
     function handleBaseImageUpload(event) {
-      const file = event.target.files[0];
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-          baseImage = loadImage(e.target.result, drawImages);
-        };
-        reader.readAsDataURL(file);
+      const files = event.target.files;
+      if (files.length > 0) {
+        baseImages = Array.from(files).map(file => loadImage(URL.createObjectURL(file), drawImages));
+        currentBaseImageIndex = 0;
       }
     }
 
