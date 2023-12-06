@@ -44,6 +44,7 @@
     let watermarkPosition = 'center';
 
     function setup() {
+      // Create a small initial canvas
       createCanvas(400, 400);
       background(255);
 
@@ -62,16 +63,24 @@
       background(255);
       if (baseImage) {
         let aspectRatio = baseImage.width / baseImage.height;
-        let canvasWidth = min(width, baseImage.width);
-        let canvasHeight = min(height, baseImage.height);
+
+        // Set canvas size based on the aspect ratio of the base image
+        let canvasWidth, canvasHeight;
         if (width / height > aspectRatio) {
           canvasWidth = height * aspectRatio;
+          canvasHeight = height;
         } else {
+          canvasWidth = width;
           canvasHeight = width / aspectRatio;
         }
+
+        resizeCanvas(canvasWidth, canvasHeight);
+
+        // Draw the base image
         image(baseImage, 0, 0, canvasWidth, canvasHeight);
       }
       if (watermarkImage) {
+        // Draw the watermark based on user-selected size and position
         let x, y;
 
         if (watermarkPosition === 'center') {
@@ -122,7 +131,8 @@
     }
 
     function draw() {
-      drawImages();
+      // drawImages is called in setup and whenever images are loaded
+      // so draw() doesn't need to do anything here
     }
   </script>
 </body>
