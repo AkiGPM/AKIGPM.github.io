@@ -3,6 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.5/jszip.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/g/filesaver.js"></script>
   <style>
     body {
       display: flex;
@@ -37,14 +39,12 @@
     </select>
   </div>
 
-  <button id="downloadBaseImage" onclick="downloadBaseImage()">Download Base Image</button>
-  <button id="downloadWatermarkedImage" onclick="downloadWatermarkedImage()">Download Watermarked Image</button>
+  <button id="downloadWatermarkedImages" onclick="downloadWatermarkedImages()">Download Watermarked Images</button>
 
   <canvas id="myCanvas"></canvas>
 
   <script>
     let baseImages = [];
-    let currentBaseImageIndex = 0;
     let watermarkImage;
     let watermarkSize = 100;
     let watermarkPosition = 'center';
@@ -68,7 +68,7 @@
     function drawImages() {
       background(255);
       if (baseImages.length > 0) {
-        let baseImage = baseImages[currentBaseImageIndex];
+        let baseImage = baseImages[0];
         let aspectRatio = baseImage.width / baseImage.height;
 
         // Set canvas size based on the aspect ratio of the base image
@@ -116,7 +116,6 @@
       const files = event.target.files;
       if (files.length > 0) {
         baseImages = Array.from(files).map(file => loadImage(URL.createObjectURL(file)));
-        currentBaseImageIndex = 0;
         drawImages();
       }
     }
@@ -142,25 +141,19 @@
       drawImages();
     }
 
-    function downloadBaseImage() {
-      if (baseImages.length > 0) {
-        const baseImage = baseImages[currentBaseImageIndex];
-        const link = document.createElement('a');
-        link.href = baseImage.canvas.toDataURL('image/png');
-        link.download = 'base_image.png';
-        link.click();
-      }
-    }
-
-    function downloadWatermarkedImage() {
+    function downloadWatermarkedImages() {
       if (baseImages.length > 0 && watermarkImage) {
-        const baseImage = baseImages[currentBaseImageIndex];
-        const canvas = createCanvas(baseImage.width, baseImage.height);
-        drawImages();
-        const link = document.createElement('a');
-        link.href = canvas.elt.toDataURL('image/png');
-        link.download = 'watermarked_image.png';
-        link.click();
+        const zip = new JSZip();
+        baseImages.forEach((baseImage, index) => {
+          const canvas = createCanvas(baseImage.width, baseImage.height);
+          drawImages();
+          const imageBlob = canvas.elt.toDataURL('image/png').split(';base64,').pop();
+          zip.file(`watermarked_image_${index + 1}.png`, imageBlob, { base64: true });
+        });
+
+        zip.generateAsync({ type: 'blob' }).then(blob => {
+          saveAs(blob, 'watermarked_images.zip');
+        });
       }
     }
   </script>
