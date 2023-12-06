@@ -2,84 +2,61 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Batch Image Watermarker</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.5.0/jszip.min.js"></script>
+  <style>
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+  </style>
 </head>
 <body>
-  <input type="file" id="watermarkInput" accept="image/*">
+  <input type="file" id="uploadInput" accept="image/*">
   <br>
-  <input type="file" id="imageInput" multiple accept="image/*">
-  <br>
-  <button onclick="applyWatermark()">Apply Watermark</button>
-  <br>
-  <canvas id="canvas"></canvas>
+  <canvas id="myCanvas" width="400" height="400"></canvas>
 
   <script>
     let watermarkImage;
-    let imagesToWatermark = [];
 
     function setup() {
       createCanvas(400, 400);
+      background(255);
+
+      // Listen for file input changes
+      document.getElementById('uploadInput').addEventListener('change', handleFileSelect);
+    }
+
+    function drawWatermark() {
+      if (watermarkImage) {
+        image(watermarkImage, 0, 0, width, height);
+      } else {
+        drawDefaultWatermark();
+      }
+    }
+
+    function drawDefaultWatermark() {
+      textSize(20);
+      fill(color(150, 150, 150));
+      textAlign(CENTER, CENTER);
+      text("Default Watermark", width / 2, height / 2);
+    }
+
+    function handleFileSelect(event) {
+      const file = event.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          watermarkImage = loadImage(e.target.result, drawWatermark);
+        };
+        reader.readAsDataURL(file);
+      }
     }
 
     function draw() {
-      // Draw your content here
-    }
-
-    function loadImageAsync(file) {
-      return new Promise((resolve) => {
-        loadImage(URL.createObjectURL(file), (img) => resolve(img));
-      });
-    }
-
-    async function applyWatermark() {
-      const watermarkInput = document.getElementById('watermarkInput');
-      const imageInput = document.getElementById('imageInput');
-
-      if (watermarkInput.files.length > 0 && imageInput.files.length > 0) {
-        const watermarkFile = watermarkInput.files[0];
-        watermarkImage = await loadImageAsync(watermarkFile);
-
-        // Once the watermark is loaded, trigger image loading
-        for (let i = 0; i < imageInput.files.length; i++) {
-          const imageFile = imageInput.files[i];
-          const img = await loadImageAsync(imageFile);
-          imagesToWatermark.push(img);
-        }
-
-        showWatermarkPreview();
-        watermarkImages();
-      } else {
-        alert("Please upload both a watermark image and one or more images to watermark.");
-      }
-    }
-
-    function showWatermarkPreview() {
-      clear();
-      image(imagesToWatermark[0], 0, 0, width, height);
-      image(watermarkImage, 0, 0, width, height);
-    }
-
-    function watermarkImages() {
-      const zip = new JSZip();
-
-      for (let i = 0; i < imagesToWatermark.length; i++) {
-        const img = imagesToWatermark[i];
-        const outputCanvas = createCanvas(img.width, img.height);
-        image(img, 0, 0);
-
-        // Apply watermark
-        image(watermarkImage, 0, 0, img.width, img.height);
-
-        const imageData = outputCanvas.elt.toDataURL('image/png');
-        zip.file(`watermarked_image_${i + 1}.png`, imageData.substr(imageData.indexOf(',') + 1), { base64: true });
-      }
-
-      zip.generateAsync({ type: 'blob' }).then((content) => {
-        saveAs(content, 'watermarked_images.zip');
-      });
+      drawWatermark();
     }
   </script>
 </body>
