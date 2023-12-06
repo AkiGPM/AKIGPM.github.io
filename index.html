@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Batch Image Watermarker</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.5/jszip.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.5.0/jszip.min.js"></script>
 </head>
 <body>
   <input type="file" id="watermarkInput" accept="image/*">
@@ -20,10 +20,6 @@
     let watermarkImage;
     let imagesToWatermark = [];
 
-    function preload() {
-      watermarkImage = loadImage('path/to/default/watermark.png'); // Default watermark image
-    }
-
     function setup() {
       createCanvas(400, 400);
     }
@@ -36,11 +32,18 @@
       const watermarkInput = document.getElementById('watermarkInput');
       const imageInput = document.getElementById('imageInput');
 
-      if (watermarkInput.files.length > 0) {
+      if (watermarkInput.files.length > 0 && imageInput.files.length > 0) {
         const watermarkFile = watermarkInput.files[0];
-        watermarkImage = loadImage(URL.createObjectURL(watermarkFile));
+        watermarkImage = loadImage(URL.createObjectURL(watermarkFile), () => {
+          // Once the watermark is loaded, trigger image loading
+          loadImages();
+        });
+      } else {
+        alert("Please upload both a watermark image and one or more images to watermark.");
       }
+    }
 
+    function loadImages() {
       if (imageInput.files.length > 0) {
         imagesToWatermark = [];
 
