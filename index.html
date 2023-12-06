@@ -13,57 +13,77 @@
   </style>
 </head>
 <body>
-  <div id="imageWatermarkInput">
-    <label for="imageUpload">Upload Image Watermark:</label>
-    <input type="file" id="imageUpload" accept="image/*">
+  <div id="baseImageInput">
+    <label for="baseImageUpload">Upload Base Image:</label>
+    <input type="file" id="baseImageUpload" accept="image/*">
+    <button onclick="uploadBaseImage()">Upload</button>
+  </div>
+
+  <div id="watermarkInput">
+    <label for="watermarkUpload">Upload Watermark:</label>
+    <input type="file" id="watermarkUpload" accept="image/*">
+    <button onclick="uploadWatermark()">Upload</button>
   </div>
 
   <canvas id="myCanvas" width="400" height="400"></canvas>
 
   <script>
+    let baseImage;
     let watermarkImage;
 
     function setup() {
       createCanvas(400, 400);
       background(255);
 
-      // Listen for changes in the image input
-      document.getElementById('imageUpload').addEventListener('change', handleImageUpload);
+      // Listen for changes in the base image input
+      document.getElementById('baseImageUpload').addEventListener('change', handleBaseImageUpload);
+
+      // Listen for changes in the watermark input
+      document.getElementById('watermarkUpload').addEventListener('change', handleWatermarkUpload);
     }
 
-    function drawWatermark() {
+    function drawImages() {
       background(255);
-      drawImageWatermark();
-    }
-
-    function drawImageWatermark() {
+      if (baseImage) {
+        image(baseImage, 0, 0, width, height);
+      }
       if (watermarkImage) {
         image(watermarkImage, 0, 0, width, height);
-      } else {
-        drawDefaultWatermark();
       }
     }
 
-    function drawDefaultWatermark() {
-      textSize(20);
-      fill(color(150, 150, 150));
-      textAlign(CENTER, CENTER);
-      text("Default Watermark", width / 2, height / 2);
-    }
-
-    function handleImageUpload(event) {
+    function handleBaseImageUpload(event) {
       const file = event.target.files[0];
       if (file) {
         const reader = new FileReader();
         reader.onload = function(e) {
-          watermarkImage = loadImage(e.target.result, drawWatermark);
+          baseImage = loadImage(e.target.result, drawImages);
         };
         reader.readAsDataURL(file);
       }
     }
 
+    function handleWatermarkUpload(event) {
+      const file = event.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          watermarkImage = loadImage(e.target.result, drawImages);
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+
+    function uploadBaseImage() {
+      document.getElementById('baseImageUpload').click();
+    }
+
+    function uploadWatermark() {
+      document.getElementById('watermarkUpload').click();
+    }
+
     function draw() {
-      drawWatermark();
+      drawImages();
     }
   </script>
 </body>
