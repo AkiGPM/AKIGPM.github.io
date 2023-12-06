@@ -115,14 +115,15 @@
     function handleBaseImageUpload(event) {
       const files = event.target.files;
       if (files.length > 0) {
-        baseImages = Array.from(files).map(file => loadImage(URL.createObjectURL(file), drawImages));
+        baseImages = Array.from(files).map(file => loadImage(URL.createObjectURL(file)));
         currentBaseImageIndex = 0;
+        drawImages();
       }
     }
 
     function handleWatermarkUpload(event) {
       const file = event.target.files[0];
-      if (file) {
+      if (file && file.type.startsWith('image/')) {
         const reader = new FileReader();
         reader.onload = function(e) {
           watermarkImage = loadImage(e.target.result, drawImages);
@@ -161,11 +162,6 @@
         link.download = 'watermarked_image.png';
         link.click();
       }
-    }
-
-    function draw() {
-      // drawImages is called in setup and whenever images are loaded
-      // so draw() doesn't need to do anything here
     }
   </script>
 </body>
